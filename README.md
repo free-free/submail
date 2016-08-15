@@ -2,8 +2,9 @@
 
 ## Enviroment
 
-> python version: >=3.x
-> requirements: requests
+**python version**: >=3.x
+
+**requirements**: requests
 
 ## Installation
 
