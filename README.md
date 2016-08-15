@@ -2,8 +2,8 @@
 
 ## Enviroment
 
-python version: >=3.x
-requirements: requests
+> python version: >=3.x
+> requirements: requests
 
 ## Installation
 
@@ -15,10 +15,12 @@ $ pip3.x setup install
 
 ### 1. send message
 
+> send single message
+
 ```python
     from submail import MessageManager
     
-    # send single  message
+  
     manager = MessageManager()
     msg = manager().message()
     msg['appid'] = 'your submail app id'
