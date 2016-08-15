@@ -3,7 +3,7 @@ from setuptools import setup,find_packages
 import re
 
 setup(
-    name="tornado_session",
+    name="submail",
     version="0.1",
     author="HuangBiao",
     author_email="19941222hb@gmail.com",
