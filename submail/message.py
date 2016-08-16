@@ -13,7 +13,6 @@ class MessageSender(object):
     def send(self, msg):
         raise NotImplementedError()
 
-
 class SimpleMessageSender(MessageSender):
     
     urls = {
@@ -113,35 +112,121 @@ class Message(object):
         del self._msg
         self._msg = {}
 
+
+class TemplateOperator(object):
+
+    url = "https://api.submail.cn/message/template.json"
+    
+    def __init__(self, data=""):
+        self._data = data
+  
+    def get(self):
+        req = requests.get(self.url, params=self._data)
+        return req.json()
+    
+    def post(self):
+        req = requests.post(self.url, data=self._data)
+        return req.json()
+
+    def put(self):
+        req = requests.put(self.url, data=self._data)
+        return req.json()
+
+    def delete(self):
+        req = requests.delete(self.url, data=self._data)
+        return req.json()         
+     
+    @property
+    def data(self):
+        return self._data
+
+    @data.setter
+    def data(self, data):
+        self._data = data
+  
+
+class Template(object):
+    
+    __slots__ = ('_manager', '_template', '_template_oper')
+    __fields__ = (
+       'appid', 'template_id', 'timestamp',
+       'sign_type', 'signature', 'sms_title', 
+       'sms_signature','sms_content'
+    )
+  
+    def __init__(self, manager, **kwargs):
+        self._manager = manager
+        self._template = {}
+        self._template_oper = TemplateOperator()
+        for key, value in kwargs.items():
+            self.__setitem__(key, value)
+ 
+    def __getattr__(self, attr):
+        _methods = ('get', 'post', 'put', 'delete')
+        if attr in _methods:
+            self._template_oper.data = self.body  
+            return getattr(self._template_oper,attr)
+        return self._template.get(attr)
+   
+    def __contains__(self, key):
+        return key in self._template
+
+    def __delattr__(self, attr):
+        if attr in self._template:
+            del self._tempalte[attr]
+
+    def __getitem__(self, key):
+        if key in self._template:
+            return self._template.get(key)
+
+    def __setitem__(self, key, value):
+        if key in self.__fields__:
+            self._template[key] = value
+    
+    def __delitem__(self, key):
+        if key in self._template:
+            del self._template[key]
+    
+    @property
+    def body(self):
+        return self._template
+
+    def clear(self):
+        self._template = {}        
+    
+    
         
 class MessageManager(object):
 
     def __init__(self):
         self._message = None
-        self._stype = 'xsend'
+        self._template = None
 
-    def send(self, inter=False): 
+    def send(self, *, stype="xsend", inter=False): 
+        r"""
+            send message 
+            @Args:
+                stype: str, send type ('xsend','multixsend','send')
+                inter: boolean, international sms send
+            @Returns:
+                response 
+        """
         if not self._message:
             raise Exception("no message to sent")
         msg = self._message.body
         if inter:
-            return InterMessageSender(self._stype).send(msg)
+            return InterMessageSender(stype).send(msg)
         else:
-            return SimpleMessageSender(self._stype).send(msg)
+            return SimpleMessageSender(stype).send(msg)
 
-    def message(self, *, stype="xsend", **kwargs):
-        self._stype = stype
+    def message(self, **kwargs):
         if not self._message:
-            self._message = Message(self,**kwargs)
+            self._message = Message(self, **kwargs)
         return self._message
- 
+    
+    def template(self, **kwargs):
+        if not self._template:
+            self._template = Template(self ,**kwargs)
+        return self._template
 
-if __name__ == '__main__':
-    manager = MessageManager()
-    msg = manager.message()
-    msg['appid'] = 11852
-    msg['project'] = "ba5Al1"
-    msg["signature"] =  "8dccf3143aeb0b6002c39e5c9ebf26b5"
-    msg["to"] = "18281573692"
-    msg["vars"] = {"email_name":"163", "email_list":"<18281573692@163.com>,<19941222hb@gmail.com>"}
-    print(msg.send())
+
