@@ -5,8 +5,11 @@ __email__ = "19941222hb@gmail.com"
 __version__ = "0.1"
 
 
-from .message import MessageManager
 
+__all__ = ('submail',)
+
+
+from .submail import submail
 
 
 
