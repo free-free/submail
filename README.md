@@ -1,7 +1,7 @@
 ##  submail sdk 
 
 [![MIT](https://img.shields.io/dub/l/vibe-d.svg)](LICENSE)
-
+[![Build Status](https://travis-ci.org/free-free/submail.svg?branch=master)](https://travis-ci.org/free-free/submail)
 
 ## Enviroment
 
