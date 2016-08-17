@@ -1,10 +1,27 @@
 ##  submail sdk 
 
+[![MIT](https://img.shields.io/dub/l/vibe-d.svg)](LICENSE)
+
+
 ## Enviroment
 
 **python version**: >=3.x
 
-**requirements**: requests
+**requirements**: requests,pytest
+
+
+## TO DO
+
+| submail service  api  |     yes/no     |
+|:---------------------:|:--------------:|
+|  sms                  |      yes       |
+| international sms     |      yes       |
+|  mail                 |      no        |
+|  cell phone traffic   |      no        |
+|  voice                |      no        |
+|  addressbook          |      no        |
+
+
 
 ## Installation
 
@@ -14,7 +31,7 @@ $ pip3.x setup install
 
 ## QuickStarted
 
-### 1. send message
+### 1.  sms service
 
 > send single message
 
@@ -32,6 +49,9 @@ $ pip3.x setup install
     msg['vars'] = {"var1":"xxxxx","var2":"yyyy"} 
     # send message,return response
     result = msg.send(stype="xsend", inter=False)
+    
+    # send international message
+    result = msg.send(stype="xsend", inter=True)
 
 ```
 
@@ -50,7 +70,66 @@ $ pip3.x setup install
     msg['multi'] ={"to":"phone number2","vars":{"var1":"2323","vars2":"dede"}}
     # send message,return response
     result = msg.send(stype="multixsend", inter=False)
+   
+    # send inernational message
+    result = msg.send(stype="multixsend", inter=True)
 
 ```
+
+> template opertion
+
+```python
+   from submail import submail
+   
+   manager = submail.build("message")
+   
+   # create template
+   tmpl = manager.template()
+   tmpl['appid'] = 'your appid'
+   tmpl['signature'] = 'your signature'
+   tmpl['sms_signature'] = 'your sms signature'
+   tmpl['sms_content'] = 'your sms_content'
+   result = tmpl.create()
+   
+   # get template
+   tmpl = manager.template()
+   tmpl['appid'] = "your appid"
+   tmpl['signature'] = "your signature"
+   tmpl['template_id'] = "template id"
+   result = tmpl.get()
+  
+   # update template 
+   tmpl = manager.template()
+   tmpl['appid'] = 'your appid'
+   tmpl['signature'] = 'your signature'
+   tmpl['sms_signature'] = 'your sms signature'
+   tmpl['sms_content'] = 'your sms_content'
+   tmpl['template_id'] = 'template id'
+   result = tmpl.update()
+
+   # delete template
+   tmpl = manager.template()
+   tmpl['appid'] = 'your appid'
+   tmpl['signature'] = 'your signature'
+   tmpl['template_id'] = 'template id'
+   tmpl.delete()
+
+```
+
+> log operation
+
+```python
+   from submail import submail
+   
+   manager = submail.build("message")
+
+   log = manager.log()
+   log['appid'] = "your appid"
+   log['signature'] = "your appid"
+   result = log.get()
+
+```
+
+
 ## License
 [MIT License](LICENSE)
