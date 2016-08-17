@@ -1,24 +1,160 @@
 # -*- coding:utf-8 -*-
 
-import functools
 import requests
-import json
 import copy
 from urllib.parse import urlencode
+
+
+
+from .common import (
+    RequestBase,
+    ServiceManager,
+    field_checker
+)    
+
+         
+
+class Message(RequestBase):
+  
+
+    __fields__ = ('appid', 'project', 'to',
+       'content', 'multi', 'vars','timestamp',
+       'signature', 'sign_type')
+
+    def __init__(self, manager, **kwargs):
+        super(Message, self).__init__(manager, **kwargs)
+
+    @property
+    def req_type(self):
+        return 'message'
+
+    @field_checker
+    def __setitem__(self, key, value):
+        # fuck code, to bad,anyone fix it,please!
+        if key in ("multi", 'vars'):
+            if key == 'multi':
+                if 'vars' in self._req_data:
+                    raise Exception("Can't assign 'multi' and 'vars' simultaneously")
+                if 'multi' not in self._req_data:
+                    self._req_data['multi'] = []
+                self._req_data['multi'].append(value)
+            if key == 'vars':
+                if 'multi' in self._req_data:
+                    raise Exception("Can't assign 'multi' and 'vars' simultaneously")
+                self._req_data['vars'] = value
+        else:
+            self._req_data[key] = value
+
+    @property
+    def req_data(self):
+        tmp_msg = copy.deepcopy(self.raw_req_data)
+        if 'vars' in self.raw_req_data:
+            tmp_msg['vars'] = json.dumps(tmp_msg['vars'])
+        if 'multi' in self.raw_req_data:
+            tmp_msg['multi'] = json.dumps(tmp_msg['multi'])
+        return tmp_msg
+        
+
+
+  
+
+class Template(RequestBase):
     
+    __fields__ = (
+       'appid', 'template_id', 'timestamp',
+       'sign_type', 'signature', 'sms_title', 
+       'sms_signature','sms_content'
+    )
+  
+    def __init__(self, manager, **kwargs):
+        super(Template, self).__init__(manager, **kwargs)
+   
+    @property
+    def req_type(self):
+        return 'template'
 
 
+class Log(RequestBase):
+    
+    __fields__ = (
+        'appid', 'signature', 'recipient',
+        'project' ,'result_status', 'start_date',
+        'end_date', 'order_by' ,'rows', 'offset',
+        'timestamp', 'sign_type'
+    )
+  
+    def __init__(self, manager, **kwargs):
+        super(Log, self).__init__(manager, **kwargs)
+
+    @property
+    def req_type(self):
+        return 'log'
+
+class SMSRequestSenderMeta(type):
+
+    def __init__(cls, name, base, attrs):
+        if not hasattr(cls,'_sms_request_sender'):
+            cls._sms_request_sender = {}
+        else:
+            name = name.lower()
+            cls._sms_request_sender[name] = cls
+        return super(SMSRequestSenderMeta, cls).__init__(name, base, attrs)
+
+
+class SMSRequestSender(object, metaclass=SMSRequestSenderMeta):
+
+
+    def __init__(self, data=""):
+        self._data = data
+
+    @classmethod
+    def resolve_sender(cls, sender_name, data=""):
+        sender_name = sender_name.lower() + 'requestsender'
+        sender = None
+        try:
+            sender = cls._sms_request_sender.get(sender_name)(data)
+        except Exception:
+            raise Exception("no definition for '5s' sender" % send_name)
+        return sender
+
+    @property
+    def data(self):
+        return self._data
+
+    @data.setter
+    def data(self, data):
+        self._data = data
+
+
+class TemplateRequestSender(SMSRequestSender):
+    
+   
+    url = "https://api.submail.cn/message/template.json"
+    
+  
+    def get(self):
+        req = requests.get(self.url, params=self._data)
+        return req.json()
+    
+    def create(self):
+        req = requests.post(self.url, data=self._data)
+        return req.json()
+
+    def update(self):
+        req = requests.put(self.url, data=self._data)
+        return req.json()
+
+    def delete(self):
+        req = requests.delete(self.url, data=self._data)
+        return req.json()         
+     
+
+        
 class MessageSender(object):
- 
-    def send(self, msg):
-        raise NotImplementedError()
-
-class SimpleMessageSender(MessageSender):
-    
     urls = {
-        "xsend":"https://api.submail.cn/message/xsend.json",
-        "send":"https://api.submail.cn/message/send.json",
-        "multixsend":"https://api.submail.cn/message/multixsend.json",
+        "xsend":"",
+        "multixsend":"",
+        "send":"",
     }
     def __init__(self, send_type="xsend"):
         r"""
@@ -28,179 +164,33 @@ class SimpleMessageSender(MessageSender):
         assert send_type.lower() in ("send", "xsend", "multixsend")
         self._send_type = send_type
 
-    def send(self, msg):
+    def send(self, data):
         url  = self.urls.get(self._send_type)
-        req = requests.post(url, data=msg)
-        return req.text
+        req = requests.post(url, data=data)
+        return req.json()
+
+
+class SimpleMessageSender(MessageSender):
+    
+    urls = {
+        "xsend":"https://api.submail.cn/message/xsend.json",
+        "send":"https://api.submail.cn/message/send.json",
+        "multixsend":"https://api.submail.cn/message/multixsend.json",
+    }
 
 
 class InterMessageSender(MessageSender):
-   
-    def __init__(self, send_type):
-        pass # To DO
+
+    urls = {
+        "xsend":"https://api.submail.cn/internationalsms/xsend.json",
+        "send":"https://api.submail.cn/internationalsms/send.json",
+        "multixsend":"https://api.submail.cn/internationalsms/multixsend.json",
+    }
+    
+
+
+class MessageRequestSender(SMSRequestSender):
  
-    def send(self, msg):
-        pass # To DO
-         
-
-class Message(object):
-  
-    __slots__ = ('_msg', '_manager')
-
-    __fields__ = ('appid', 'project', 'to',
-       'content', 'multi', 'vars','timestamp',
-       'signature', 'sign_type')
-
-    def __init__(self, manager, **kwargs):
-        self._manager = manager
-        self._msg = {}
-        for key, value in kwargs.items():
-            self.__setitem__(key, value)
-
-    def __getattr__(self, attr):
-        if attr == 'send':
-            return self._manager.send
-        return self._msg.get(attr)
-    
-    def __delattr__(self, attr):
-        if attr in self._msg:
-            del self._msg[attr]
-
-    def __contains__(self, key):
-        return key in self._msg
-
-    def __setitem__(self, key, value):
-        # fuck code, to bad,anyone fix it,please!
-        if  key in self.__fields__:
-            if key in ("multi", 'vars'):
-                if key == 'multi':
-                    if 'vars' in self._msg:
-                        raise Exception("Can't assign 'multi' and 'vars' simultaneously")
-                    if 'multi' not in self._msg:
-                        self._msg['multi'] = []
-                    self._msg['multi'].append(value)
-                if key == 'vars':
-                    if 'multi' in self._msg:
-                        raise Exception("Can't assign 'multi' and 'vars' simultaneously")
-                    self._msg['vars'] = value
-            else:
-                self._msg[key] = value
-        else:
-            raise Exception("Key Error,No such '%s' key"  % key)     
-
-    def __getitem__(self, key):
-        return self._msg.get(key)
-   
-    def __delitem__(self, key):
-        if key in self._msg:
-            del self._msg[key]
-
-    @property
-    def raw_body(self):
-        return self._msg
-
-    @property
-    def body(self):
-        tmp_msg = copy.deepcopy(self._msg)
-        if 'vars' in self._msg:
-            tmp_msg['vars'] = json.dumps(tmp_msg['vars'])
-        if 'multi' in self._msg:
-            tmp_msg['multi'] = json.dumps(tmp_msg['multi'])
-        return tmp_msg
-        
-    def clear(self):
-        del self._msg
-        self._msg = {}
-
-
-class TemplateOperator(object):
-
-    url = "https://api.submail.cn/message/template.json"
-    
-    def __init__(self, data=""):
-        self._data = data
-  
-    def get(self):
-        req = requests.get(self.url, params=self._data)
-        return req.json()
-    
-    def post(self):
-        req = requests.post(self.url, data=self._data)
-        return req.json()
-
-    def put(self):
-        req = requests.put(self.url, data=self._data)
-        return req.json()
-
-    def delete(self):
-        req = requests.delete(self.url, data=self._data)
-        return req.json()         
-     
-    @property
-    def data(self):
-        return self._data
-
-    @data.setter
-    def data(self, data):
-        self._data = data
-  
-
-class Template(object):
-    
-    __slots__ = ('_manager', '_template', '_template_oper')
-    __fields__ = (
-       'appid', 'template_id', 'timestamp',
-       'sign_type', 'signature', 'sms_title', 
-       'sms_signature','sms_content'
-    )
-  
-    def __init__(self, manager, **kwargs):
-        self._manager = manager
-        self._template = {}
-        self._template_oper = TemplateOperator()
-        for key, value in kwargs.items():
-            self.__setitem__(key, value)
- 
-    def __getattr__(self, attr):
-        _methods = ('get', 'post', 'put', 'delete')
-        if attr in _methods:
-            self._template_oper.data = self.body  
-            return getattr(self._template_oper,attr)
-        return self._template.get(attr)
-   
-    def __contains__(self, key):
-        return key in self._template
-
-    def __delattr__(self, attr):
-        if attr in self._template:
-            del self._tempalte[attr]
-
-    def __getitem__(self, key):
-        if key in self._template:
-            return self._template.get(key)
-
-    def __setitem__(self, key, value):
-        if key in self.__fields__:
-            self._template[key] = value
-    
-    def __delitem__(self, key):
-        if key in self._template:
-            del self._template[key]
-    
-    @property
-    def body(self):
-        return self._template
-
-    def clear(self):
-        self._template = {}        
-    
-    
-        
-class MessageManager(object):
-
-    def __init__(self):
-        self._message = None
-        self._template = None
 
     def send(self, *, stype="xsend", inter=False): 
         r"""
@@ -211,22 +201,40 @@ class MessageManager(object):
             @Returns:
                 response 
         """
-        if not self._message:
-            raise Exception("no message to sent")
-        msg = self._message.body
         if inter:
-            return InterMessageSender(stype).send(msg)
+            return InterMessageSender(stype).send(self._data)
         else:
-            return SimpleMessageSender(stype).send(msg)
+            return SimpleMessageSender(stype).send(self._data)
+
+
+class LogRequestSender(SMSRequestSender):
+    url = "https://api.submail.cn/log/message.json"
+
+    def get(self):
+        req = requests.post(self.url, data=self._data)
+        return req.json()        
+
+
+class MessageManager(ServiceManager):
+
+    
+    def __init__(self):
+        self._message = None
 
     def message(self, **kwargs):
-        if not self._message:
-            self._message = Message(self, **kwargs)
+        self._message = Message(self, **kwargs)
         return self._message
     
     def template(self, **kwargs):
-        if not self._template:
-            self._template = Template(self ,**kwargs)
-        return self._template
+        return Template(self , **kwargs)
 
+    def log(self, **kwargs):
+        return Log(self, **kwargs) 
 
+    def request_sender(self, req, method):
+        return getattr(SMSRequestSender.resolve_sender(req.req_type, req.req_data), method)
+   
+
+   
+if __name__ == '__main__':
+    pass 
