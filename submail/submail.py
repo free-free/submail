@@ -1,7 +1,7 @@
 # coding=utf-8
 
 
-from .message import SMSManager
+from .sms import SMSManager
 from .common import ServiceManager
 
 
