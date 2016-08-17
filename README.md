@@ -5,7 +5,7 @@
 
 ## Enviroment
 
-**python version**: >=3.x
+**python version**: >=3.3
 
 **requirements**: requests,pytest
 
