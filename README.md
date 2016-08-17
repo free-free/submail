@@ -39,7 +39,7 @@ $ pip3.x setup install
     from submail import submail
     
   
-    manager = submail.build("message")
+    manager = submail.build("sms")
     msg = manager.message()
     msg['appid'] = 'your submail app id'
     msg['project'] = 'your message template id'
@@ -61,7 +61,7 @@ $ pip3.x setup install
     from submail import submail
 
 
-    manager = submail.build("message")
+    manager = submail.build("sms")
     msg = manager.message()
     msg['appid'] = 'your submail app id'
     msg['project'] = 'your message template id'
@@ -81,7 +81,7 @@ $ pip3.x setup install
 ```python
    from submail import submail
    
-   manager = submail.build("message")
+   manager = submail.build("sms")
    
    # create template
    tmpl = manager.template()
@@ -121,7 +121,7 @@ $ pip3.x setup install
 ```python
    from submail import submail
    
-   manager = submail.build("message")
+   manager = submail.build("sms")
 
    log = manager.log()
    log['appid'] = "your appid"
