@@ -215,7 +215,7 @@ class LogRequestSender(SMSRequestSender):
         return req.json()        
 
 
-class MessageManager(ServiceManager):
+class SMSManager(ServiceManager):
 
     
     def __init__(self):
