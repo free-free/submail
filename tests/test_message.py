@@ -10,7 +10,6 @@ from submail import submail
 
 
 
-
 class MessageTest(unittest.TestCase):
  
     msg_manager = submail.build("message")
@@ -36,7 +35,7 @@ class MessageTest(unittest.TestCase):
         
         fields = ('appid','signature','to','vars','project')
         for field in fields:
-            self.assertIn(field, msg.body.keys())
+            self.assertIn(field, msg.req_data.keys())
 
     def test_01_message_xsend(self): 
         msg = self.msg_manager.message()
@@ -45,9 +44,7 @@ class MessageTest(unittest.TestCase):
         msg['to'] = self.to[0]
         msg['vars'] = self.var
         msg['project'] = self.project
-        print(msg.body)
         result = msg.send(stype="xsend", inter=False)
-        result = json.loads(result)
         print(result)
         self.assertEqual(result['status'],'success')
      
@@ -58,9 +55,7 @@ class MessageTest(unittest.TestCase):
         msg['multi'] = {"to":self.to[0],"vars":self.var}
         msg['multi'] = {"to":"18048907875","vars":self.var}
         msg['project'] = self.project
-        print(msg.body)
         result = msg.send(stype="multixsend", inter=False)
-        result = json.loads(result)
         print(result)
         self.assertEqual(result[0]['status'],'success')
         self.assertEqual(result[1]['status'],'success')
@@ -84,7 +79,7 @@ class MessageTest(unittest.TestCase):
         # I have no phone number, so I don't test it.
         # TO DO: test it
         pass
-   
+
 
 class TemplateTest(unittest.TestCase):
     
@@ -105,15 +100,15 @@ class TemplateTest(unittest.TestCase):
             message['xxx'] = 12
         fields = ('appid','signature','sms_signature','sms_content')
         for field in fields:
-            self.assertIn(field, message.body.keys())
+            self.assertIn(field, message.req_data.keys())
        
-    def test_01_template_post(self):
+    def test_01_template_create(self):
         message = self.msg_manager.template()
         message['appid'] = self.appid
         message['signature'] = self.signature
         message['sms_signature'] = self.sms_signature
         message['sms_content'] = self.sms_content
-        result = message.post()
+        result = message.create()
         type(self).template_id = result['template_id']
         self.assertEqual(result['status'],'success')
     
@@ -125,14 +120,14 @@ class TemplateTest(unittest.TestCase):
         result = message.get()
         self.assertEqual(result['status'],'success') 
 
-    def test_03_template_put(self):
+    def test_03_template_update(self):
         message = self.msg_manager.template()
         message['appid'] = self.appid
         message['signature'] = self.signature
         message['sms_signature'] = self.sms_signature
         message['sms_content'] = self.sms_content
         message['template_id'] = type(self).template_id
-        result = message.put()
+        result = message.update()
         self.assertEqual(result['status'],'success')
 
     def test_04_template_delete(self):
@@ -142,6 +137,30 @@ class TemplateTest(unittest.TestCase):
         message['template_id'] = type(self).template_id
         result = message.delete()
         self.assertEqual(result['status'],'success') 
+
+
+class LogTest(unittest.TestCase):
+  
+    msg_manager = submail.build("message")
+    appid = 11858
+    signature = "be72c77ae6720ae08be1e61d516ca0a8"
+    
+    def  test_00_build_log(self):
+        log = self.msg_manager.log()
+        log['appid'] = self.appid
+        log['signature'] = self.signature
+        with self.assertRaises(Exception):
+            log['xxx'] = 21
+        for field in ('appid', 'signature'):
+            self.assertIn(field, log.req_data.keys())
+    
+    def test_01_log_get(self):
+         
+        log = self.msg_manager.log()
+        log['appid'] = self.appid
+        log['signature'] = self.signature
+        result = log.get()
+        self.assertEqual(result['status'] ,'success')
 
 if __name__ == '__main__':
     unittest.main()
