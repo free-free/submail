@@ -2,20 +2,16 @@
 
 
 from .message import MessageManager
+from .common import ServiceManager
 
 
 
 
 class submail(object):
-    
-    _srv_manager = {
-        'message':MessageManager
-    }
+   
 
     @classmethod
-    def build(self, service):
-        if service not in self._srv_manager:
-            raise Exception("submail no such service")
-        return self._srv_manager.get(service)()
+    def build(self, srv_name):
+        return ServiceManager.resolve_manager(srv_name)
 
     
