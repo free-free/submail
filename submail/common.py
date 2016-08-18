@@ -20,7 +20,6 @@ class ServiceManagerMeta(type):
         else:
             name = name.lower()
             cls._srv_manager[name] = cls
-            print(name)
         return super(ServiceManagerMeta, cls).__init__(
            name, base, attrs)
 
