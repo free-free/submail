@@ -4,8 +4,6 @@ import requests
 import copy
 from urllib.parse import urlencode
 
-
-
 from .common import (
     RequestBase,
     ServiceManager,
@@ -13,7 +11,6 @@ from .common import (
 )    
 
          
-
 class Message(RequestBase):
   
 
@@ -55,9 +52,6 @@ class Message(RequestBase):
         return tmp_msg
         
 
-
-  
-
 class Template(RequestBase):
     
     __fields__ = (
@@ -90,6 +84,7 @@ class Log(RequestBase):
     def req_type(self):
         return 'log'
 
+
 class SMSRequestSenderMeta(type):
 
     def __init__(cls, name, base, attrs):
@@ -102,7 +97,6 @@ class SMSRequestSenderMeta(type):
 
 
 class SMSRequestSender(object, metaclass=SMSRequestSenderMeta):
-
 
     def __init__(self, data=""):
         self._data = data
@@ -127,11 +121,9 @@ class SMSRequestSender(object, metaclass=SMSRequestSenderMeta):
 
 
 class TemplateRequestSender(SMSRequestSender):
-    
-   
+       
     url = "https://api.submail.cn/message/template.json"
     
-  
     def get(self):
         req = requests.get(self.url, params=self._data)
         return req.json()
@@ -148,14 +140,15 @@ class TemplateRequestSender(SMSRequestSender):
         req = requests.delete(self.url, data=self._data)
         return req.json()         
      
-
         
 class MessageSender(object):
+
     urls = {
         "xsend":"",
         "multixsend":"",
         "send":"",
     }
+
     def __init__(self, send_type="xsend"):
         r"""
         @Args:
@@ -188,10 +181,8 @@ class InterMessageSender(MessageSender):
     }
     
 
-
 class MessageRequestSender(SMSRequestSender):
  
-
     def send(self, *, stype="xsend", inter=False): 
         r"""
             send message 
@@ -208,6 +199,7 @@ class MessageRequestSender(SMSRequestSender):
 
 
 class LogRequestSender(SMSRequestSender):
+ 
     url = "https://api.submail.cn/log/message.json"
 
     def get(self):
@@ -216,8 +208,7 @@ class LogRequestSender(SMSRequestSender):
 
 
 class SMSManager(ServiceManager):
-
-    
+   
     def __init__(self):
         self._message = None
 
@@ -235,6 +226,3 @@ class SMSManager(ServiceManager):
         return getattr(SMSRequestSender.resolve_sender(req.req_type, req.req_data), method)
    
 
-   
-if __name__ == '__main__':
-    pass 
