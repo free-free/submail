@@ -16,7 +16,7 @@
 |:---------------------:|:--------------:|
 |  sms                  |      yes       |
 | international sms     |      yes       |
-|  mail                 |      no        |
+|  mail                 |      yes       |
 |  cell phone traffic   |      no        |
 |  voice                |      no        |
 |  addressbook          |      no        |
@@ -130,6 +130,36 @@ $ pip3.x setup install
 
 ```
 
+### 2. mail service
 
+> mail send
+
+```python
+
+    from submail import submail
+   
+    manager = submail.build("mail")
+    
+    # send api
+    mail = manager.mail()
+    mail['appid'] = "your app id"
+    mail["signature"] = "your signature"
+    mail["subject"] = "title"
+    mail["to"] = "to mail address"
+    mail["from"] = "your mail address"
+    mail["from_name"] = "your mail address"
+    mail.send()
+
+    # xsend api 
+    mail = manager.mail()
+    mail["appid"] = "your appid"
+    mail["signature"] = "your signature"
+    mail["project"] = "mail project id"
+    mail["to"] = "to mail address"
+    mail["from"] = "your mail address"
+    mail.send("xsend") 
+
+```
+    
 ## License
 [MIT License](LICENSE)
