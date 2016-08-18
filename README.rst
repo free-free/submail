@@ -20,9 +20,8 @@ Enviroment
 TO DO
 --------
 
-
 .. list-table::
-   :width: 70 30
+   :widths: 70 30
    :header-rows: 1
     
    * - submail service api
