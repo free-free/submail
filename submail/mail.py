@@ -1,16 +1,15 @@
 # coding=utf-8
 
-
 import json
 import copy
+
+import requests
 
 from .common import(
     RequestBase,
     ServiceManager,
     field_checker
 )
-
-
 
 
 class Mail(RequestBase):
@@ -21,20 +20,21 @@ class Mail(RequestBase):
         'reply', 'cc', 'bcc', 'subject',
         'text', 'html', 'vars', 'links',
         'attachments', 'headers', 'asynchronous',
-        'timestamp', 'sign_type', 'tag'
+        'timestamp', 'sign_type', 'tag', 'project'
     )
         
     def __init__(self, manager, **kwargs):
-        super(Mail, self).__init__(manager, **kwargs):
+        super(Mail, self).__init__(manager, **kwargs)
  
     @field_checker
     def __setitem__(self, key, value):
          if key in ('to', 'addressbook', 'cc', 'bcc'):
              if key not in self._req_data:
                  self._req_data[key] = []
-             self._req_data.append(value)
+             self._req_data[key].append(value)
          else:
              self._req_data[key] = value  
+
     @property
     def req_type(self):
         return 'mail'
@@ -59,17 +59,17 @@ class MailRequestSenderBaseMeta(type):
         else:
             name = name.lower()
             cls._mail_sender[name] = cls
-        return super().__init__(cls, name, base, attrs)
+        return super().__init__(name, base, attrs)
 
 
-class MailRequestSenderBase(object, metaclass=MailSenderBaseMeta):
+class MailRequestSenderBase(object, metaclass=MailRequestSenderBaseMeta):
     
     def __init__(self, data=""):
         self._data = data
 
     @classmethod
     def resolve_sender(cls, sender_name, data=""):
-        sender_name = send_name + ' requestsender'
+        sender_name = sender_name + 'requestsender'
         sender = None
         try:
             sender = cls._mail_sender.get(sender_name)(data)
@@ -103,7 +103,7 @@ class MailManager(ServiceManager):
 
      
     def mail(self, **kwargs):
-        return mail(self, **kwargs)
+        return Mail(self, **kwargs)
 
     def request_sender(self, req, method):
         return getattr(MailRequestSenderBase.resolve_sender(req.req_type,req.req_data), method)
