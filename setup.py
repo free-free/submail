@@ -28,7 +28,7 @@ setup(
     url="https://github.com/free-free/submail",
     license="MIT",
     packages=find_packages(),
-    install_requires=re.split(r'\r*\n+',read('requirements.txt')),
+    install_requires=["requests", "pytest"],
     include_package_data=True,
     keywords=['submail','sdk'],
     classifiers=[
