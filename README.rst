@@ -3,11 +3,10 @@ submail sdk
 
 .. image:: https://img.shields.io/dub/l/vibe-d.svg
   :target: LICENSE
-  :align: right
-
+  :align: left
 .. image:: https://travis-ci.org/free-free/submail.svg?branch=master
   :target: https://travis-ci.org/free-free/submail
-  :align: right
+  :align: left
 
 
 Enviroment
@@ -22,15 +21,24 @@ TO DO
 --------
 
 
-| submail service  api  |     yes/no     |
-|:---------------------:|:--------------:|
-|  sms                  |      yes       |
-| international sms     |      yes       |
-|  mail                 |      yes       |
-|  cell phone traffic   |      no        |
-|  voice                |      no        |
-|  addressbook          |      no        |
-
+.. list-table::
+   :width: 70 30
+   :header-rows: 1
+    
+   * - submail service api
+     - yes/no
+   * - sms  
+     - yes
+   * - international sms
+     - yes
+   * - mail
+     - yes
+   * - cell phone traffic
+     - no
+   * - voice
+     - no
+   * - addressbook
+     - no
 
 
 Installation
