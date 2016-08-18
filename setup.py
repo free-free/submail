@@ -16,7 +16,7 @@ setup(
     version=__version__,
     author="HuangBiao",
     author_email="19941222hb@gmail.com",
-    long_description=read('README.md'),
+    long_description=read('README.rst'),
     description="submail sdk",
     url="https://github.com/free-free/submail",
     license="MIT",
