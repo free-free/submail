@@ -2,18 +2,26 @@
 
 from setuptools import setup,find_packages
 import re
+import os
+
 from submail import __version__
+
+
+def read(f):
+    return open(os.path.join(os.path.dirname(__file__),f)).read().strip()
+
 
 setup(
     name="submail",
     version=__version__,
     author="HuangBiao",
     author_email="19941222hb@gmail.com",
+    long_description=read('README.md'),
     description="submail sdk",
     url="https://github.com/free-free/submail",
     license="MIT",
     packages=find_packages(),
-    install_requires=re.split(r"\r*\n+", open("requirements.txt", 'r').read())[0:-1],
+    install_requires=re.split(r'\r*\n+',read('requirements.txt')),
     include_package_data=True,
     keywords=['submail','sdk'],
     classifiers=[
